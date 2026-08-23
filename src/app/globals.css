@@ -1,0 +1,400 @@
+@import "tailwindcss";
+
+/* ─────────────────────────────────────────────────────────────
+   Design tokens
+   ───────────────────────────────────────────────────────────── */
+@theme {
+  /* Typography */
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo,
+    Monaco, Consolas, "Liberation Mono", monospace;
+
+  /* Surfaces — deep, near-black with a cool tint */
+  --color-ink: #08080b;
+  --color-surface: #0e0e12;
+  --color-raised: #14141a;
+  --color-line: rgb(255 255 255 / 0.08);
+  --color-line-strong: rgb(255 255 255 / 0.16);
+
+  /* Text */
+  --color-fg: #f1f1f4;
+  --color-muted: #a8a8b3;
+  --color-faint: #71717c;
+
+  /* Accent — soft periwinkle, used sparingly */
+  --color-accent: #9aa0ff;
+  --color-accent-deep: #7c86ff;
+  --color-accent-bright: #d2d5ff;
+  --color-cyan-soft: #7fd4ff;
+
+  /* Shadows */
+  --shadow-card: inset 0 1px 0 0 rgb(255 255 255 / 0.04),
+    0 24px 60px -28px rgb(0 0 0 / 0.7);
+  --shadow-lift: inset 0 1px 0 0 rgb(255 255 255 / 0.05),
+    0 40px 90px -30px rgb(0 0 0 / 0.85);
+  --shadow-glow: 0 0 90px -24px rgb(154 160 255 / 0.5);
+
+  /* Motion */
+  --animate-marquee: marquee 46s linear infinite;
+  --animate-marquee-reverse: marquee-reverse 56s linear infinite;
+  --animate-orb: orb 30s ease-in-out infinite alternate;
+  --animate-orb-b: orb-b 40s ease-in-out infinite alternate;
+  --animate-drift: drift 20s linear infinite;
+  --animate-spin-slow: spin-slow 36s linear infinite;
+  --animate-scroll-dot: scroll-dot 2.2s ease-in-out infinite;
+
+  @keyframes marquee {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+  @keyframes marquee-reverse {
+    from {
+      transform: translateX(-50%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+  @keyframes orb {
+    0% {
+      transform: translate3d(-6%, -4%, 0) scale(1);
+    }
+    50% {
+      transform: translate3d(9%, 6%, 0) scale(1.14);
+    }
+    100% {
+      transform: translate3d(-4%, 9%, 0) scale(0.96);
+    }
+  }
+  @keyframes orb-b {
+    0% {
+      transform: translate3d(6%, 7%, 0) scale(1.06);
+    }
+    50% {
+      transform: translate3d(-9%, -6%, 0) scale(0.9);
+    }
+    100% {
+      transform: translate3d(4%, -8%, 0) scale(1.1);
+    }
+  }
+  @keyframes drift {
+    0% {
+      transform: translate3d(0, 0, 0);
+      opacity: 0;
+    }
+    12% {
+      opacity: var(--particle-opacity, 0.5);
+    }
+    88% {
+      opacity: var(--particle-opacity, 0.5);
+    }
+    100% {
+      transform: translate3d(var(--drift-x, 30px), var(--drift-y, -180px), 0);
+      opacity: 0;
+    }
+  }
+  @keyframes spin-slow {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @keyframes scroll-dot {
+    0% {
+      transform: translateY(0);
+      opacity: 0;
+    }
+    30% {
+      opacity: 1;
+    }
+    80% {
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(22px);
+      opacity: 0;
+    }
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Light-mode overrides
+   ───────────────────────────────────────────────────────────── */
+[data-theme="light"] {
+  color-scheme: light;
+
+  /* Surfaces — warm off-whites */
+  --color-ink: #f8f8fa;
+  --color-surface: #ffffff;
+  --color-raised: #f0f0f4;
+  --color-line: rgb(0 0 0 / 0.08);
+  --color-line-strong: rgb(0 0 0 / 0.14);
+
+  /* Text */
+  --color-fg: #1a1a22;
+  --color-muted: #5c5c6a;
+  --color-faint: #9494a0;
+
+  /* Accent — slightly deeper for contrast */
+  --color-accent: #6366f1;
+  --color-accent-deep: #4f46e5;
+  --color-accent-bright: #818cf8;
+  --color-cyan-soft: #22b4d4;
+
+  /* Shadows — softer for light mode */
+  --shadow-card: inset 0 1px 0 0 rgb(255 255 255 / 0.8),
+    0 24px 60px -28px rgb(0 0 0 / 0.12);
+  --shadow-lift: inset 0 1px 0 0 rgb(255 255 255 / 0.9),
+    0 40px 90px -30px rgb(0 0 0 / 0.18);
+  --shadow-glow: 0 0 90px -24px rgb(99 102 241 / 0.25);
+}
+
+[data-theme="light"] .bg-grid {
+  background-image: linear-gradient(
+      to right,
+      rgb(0 0 0 / 0.04) 1px,
+      transparent 1px
+    ),
+    linear-gradient(to bottom, rgb(0 0 0 / 0.04) 1px, transparent 1px);
+}
+
+[data-theme="light"] .bg-noise {
+  opacity: 0.015;
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background-color: rgb(0 0 0 / 0.12);
+  border: 3px solid var(--color-ink);
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(0 0 0 / 0.2);
+}
+
+[data-theme="light"] .animate-drift {
+  background-color: rgb(0 0 0 / 0.2) !important;
+}
+
+/* Override white-opacity utilities for light mode */
+[data-theme="light"] [class*="bg-white/[0."] {
+  background-color: rgb(0 0 0 / var(--tw-bg-opacity, 0.02)) !important;
+}
+[data-theme="light"] [class*="hover:bg-white/[0."]:hover {
+  background-color: rgb(0 0 0 / 0.06) !important;
+}
+[data-theme="light"] [class*="border-white/"] {
+  border-color: rgb(0 0 0 / 0.15) !important;
+}
+[data-theme="light"] [class*="hover:border-white/"]:hover {
+  border-color: rgb(0 0 0 / 0.25) !important;
+}
+[data-theme="light"] [class*="text-white/"] {
+  color: rgb(0 0 0 / 0.5) !important;
+}
+
+/* Primary button hover in light mode */
+[data-theme="light"] .hover\:bg-white:hover {
+  background-color: var(--color-raised) !important;
+}
+[data-theme="light"] .hover\:shadow-glow:hover {
+  box-shadow: 0 0 60px -20px rgb(99 102 241 / 0.3) !important;
+}
+
+[data-theme="light"] .spotlight-border::before {
+  background: radial-gradient(
+    240px circle at var(--spot-x, 50%) var(--spot-y, 50%),
+    rgb(0 0 0 / 0.12),
+    transparent 70%
+  );
+}
+
+[data-theme="light"] .text-gradient {
+  background-image: linear-gradient(180deg, #1a1a22 0%, #5c5c6a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Base
+   ───────────────────────────────────────────────────────────── */
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  * {
+    border-color: var(--color-line);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 6.5rem;
+    overflow-x: clip;
+  }
+
+  body {
+    background-color: var(--color-ink);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: clip;
+    transition: background-color 0.4s ease, color 0.4s ease;
+  }
+
+  ::selection {
+    background-color: color-mix(in oklab, var(--color-accent) 30%, transparent);
+    color: var(--color-fg);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: rgb(255 255 255 / 0.1);
+    border-radius: 9999px;
+    border: 3px solid var(--color-ink);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(255 255 255 / 0.18);
+  }
+
+  /* Decorative motion is effectively disabled for reduced-motion users.
+     Framer Motion gets its own handling via MotionConfig reducedMotion="user". */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+    .animate-marquee,
+    .animate-marquee-reverse {
+      animation-play-state: paused !important;
+    }
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Utilities
+   ───────────────────────────────────────────────────────────── */
+
+/* Faint blueprint grid */
+@utility bg-grid {
+  background-image: linear-gradient(
+      to right,
+      rgb(255 255 255 / 0.045) 1px,
+      transparent 1px
+    ),
+    linear-gradient(to bottom, rgb(255 255 255 / 0.045) 1px, transparent 1px);
+  background-size: 54px 54px;
+}
+
+/* Film-grain noise (inline SVG turbulence) */
+@utility bg-noise {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Soft horizontal edge fade (marquees) */
+@utility mask-fade-x {
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 12%,
+    black 88%,
+    transparent
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 12%,
+    black 88%,
+    transparent
+  );
+}
+
+/* Fade toward the bottom */
+@utility mask-fade-b {
+  -webkit-mask-image: linear-gradient(to bottom, black 35%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 35%, transparent 100%);
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Selective glassmorphism */
+@utility glass {
+  background: rgb(255 255 255 / 0.04);
+  border: 1px solid var(--color-line);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+}
+
+/* Soft white-to-grey display text */
+@utility text-gradient {
+  background-image: linear-gradient(180deg, #ffffff 0%, #b6b6c2 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Accent gradient for highlighted words */
+@utility text-gradient-accent {
+  background-image: linear-gradient(
+    100deg,
+    var(--color-accent-bright) 0%,
+    var(--color-accent) 50%,
+    var(--color-cyan-soft) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Cursor-tracking border light. Set --spot-x / --spot-y via JS. */
+@utility spotlight-border {
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: radial-gradient(
+      240px circle at var(--spot-x, 50%) var(--spot-y, 50%),
+      rgb(255 255 255 / 0.45),
+      transparent 70%
+    );
+    -webkit-mask: linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.45s ease;
+    pointer-events: none;
+  }
+  &:hover::before {
+    opacity: 1;
+  }
+}

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="14" fill="#08080b"/>
+  <rect x="1.5" y="1.5" width="61" height="61" rx="12.5" fill="none" stroke="rgb(255 255 255 / 0.12)" stroke-width="2"/>
+  <text x="32" y="41" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="25" font-weight="600" text-anchor="middle" fill="#f1f1f4">AH</text>
+  <circle cx="46" cy="17" r="5" fill="#9aa0ff" opacity="0.85"/>
+</svg>
