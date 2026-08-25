@@ -116,6 +116,46 @@ export async function POST(req: NextRequest) {
     const phone = sanitize(String(body.phone || ""), MAX_PHONE_LENGTH);
     const message = sanitize(String(body.message || ""), MAX_MESSAGE_LENGTH);
 
+    /* --- verify reCAPTCHA --- */
+    const captchaToken = String(body.captchaToken || "");
+    if (!captchaToken) {
+      return NextResponse.json(
+        { error: "CAPTCHA verification is required." },
+        { status: 400 }
+      );
+    }
+
+    const recaptchaSecret = process.env.RECAPTCHA_SECRET_KEY;
+    if (!recaptchaSecret) {
+      console.error("Missing RECAPTCHA_SECRET_KEY environment variable.");
+      return NextResponse.json(
+        { error: "CAPTCHA service is not configured." },
+        { status: 503 }
+      );
+    }
+
+    const captchaVerifyRes = await fetch(
+      "https://www.google.com/recaptcha/api/siteverify",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          secret: recaptchaSecret,
+          response: captchaToken,
+          remoteip: ip,
+        }),
+      }
+    );
+
+    const captchaVerifyData = await captchaVerifyRes.json();
+
+    if (!captchaVerifyData.success) {
+      return NextResponse.json(
+        { error: "CAPTCHA verification failed. Please try again." },
+        { status: 400 }
+      );
+    }
+
     /* --- validate --- */
     const errors: Record<string, string> = {};
     if (!name) errors.name = "Name is required.";

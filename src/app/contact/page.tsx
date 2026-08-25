@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useCallback } from "react";
 import { motion } from "motion/react";
 import { ArrowUpRight, Check, Loader2 } from "lucide-react";
 import { GithubIcon, LinkedinIcon } from "@/components/ui/BrandIcons";
 import { socials } from "@/data/socials";
 import { site } from "@/data/site";
+import ReCAPTCHA from "react-google-recaptcha-v2";
 import { cn, EASE } from "@/lib/utils";
 import { Container } from "@/components/ui/Container";
 import { Reveal } from "@/components/ui/Reveal";
@@ -24,6 +25,14 @@ interface FormErrors {
 }
 
 type SubmitStatus = "idle" | "sending" | "success" | "error";
+
+declare global {
+  interface Window {
+    grecaptcha?: {
+      reset: (widgetId?: number) => void;
+    };
+  }
+}
 
 const inputClasses = cn(
   "w-full rounded-xl border border-line bg-white/[0.03] px-5 py-3.5 text-sm text-fg",
@@ -45,6 +54,17 @@ export default function ContactPage() {
   const [status, setStatus] = useState<SubmitStatus>("idle");
   const [serverError, setServerError] = useState("");
   const [isPending, startTransition] = useTransition();
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaError, setCaptchaError] = useState("");
+
+  const onCaptchaChange = useCallback((token: string | null) => {
+    setCaptchaToken(token);
+    if (token) setCaptchaError("");
+  }, []);
+
+  const onCaptchaExpired = useCallback(() => {
+    setCaptchaToken(null);
+  }, []);
 
   const validate = (): FormErrors => {
     const e: FormErrors = {};
@@ -64,18 +84,29 @@ export default function ContactPage() {
     setErrors(validationErrors);
     if (Object.keys(validationErrors).length > 0) return;
 
+    if (!captchaToken) {
+      setCaptchaError("Please complete the CAPTCHA to continue.");
+      return;
+    }
+
     setStatus("sending");
     startTransition(async () => {
       try {
         const res = await fetch("/api/contact", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(fields),
+          body: JSON.stringify({ ...fields, captchaToken }),
         });
 
         const data = await res.json();
 
         if (!res.ok) {
+          // Reset CAPTCHA on error so the user can retry
+          if (window.grecaptcha) {
+            window.grecaptcha.reset();
+          }
+          setCaptchaToken(null);
+
           if (data.errors) {
             setErrors(data.errors);
             setStatus("idle");
@@ -85,6 +116,12 @@ export default function ContactPage() {
           }
           return;
         }
+
+        // Reset CAPTCHA on success
+        if (window.grecaptcha) {
+          window.grecaptcha.reset();
+        }
+        setCaptchaToken(null);
 
         setStatus("success");
       } catch {
@@ -211,7 +248,12 @@ export default function ContactPage() {
                     onClick={() => {
                       setStatus("idle");
                       setServerError("");
+                      setCaptchaToken(null);
+                      setCaptchaError("");
                       setFields({ name: "", email: "", phone: "", message: "" });
+                      if (window.grecaptcha) {
+                        window.grecaptcha.reset();
+                      }
                     }}
                     className="mt-6 text-sm text-accent transition-colors hover:text-fg"
                   >
@@ -312,11 +354,28 @@ export default function ContactPage() {
                   </div>
                 )}
 
+                {/* CAPTCHA */}
+                <Reveal delay={0.22}>
+                  <div className="mb-5">
+                    <div className="flex justify-center">
+                      <ReCAPTCHA
+                        sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ""}
+                        onChange={onCaptchaChange}
+                        onExpired={onCaptchaExpired}
+                        theme="dark"
+                      />
+                    </div>
+                    {captchaError && (
+                      <p className="mt-1.5 text-center text-xs text-red-400/80">{captchaError}</p>
+                    )}
+                  </div>
+                </Reveal>
+
                 {/* Submit */}
                 <Reveal delay={0.25}>
                   <button
                     type="submit"
-                    disabled={isPending}
+                    disabled={isPending || !captchaToken}
                     className={cn(
                       "group flex w-full items-center justify-center gap-2.5 rounded-xl bg-fg px-6 py-3.5 text-sm font-medium text-ink transition-all duration-300",
                       "hover:bg-white focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2",
