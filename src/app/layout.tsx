@@ -10,6 +10,7 @@ import { ScrollProgress } from "@/components/ScrollProgress";
 import { CursorEffect } from "@/components/CursorEffect";
 import { Loader } from "@/components/Loader";
 import { ThemeProvider } from "@/lib/theme";
+import { Chatbot } from "@/components/chatbot/Chatbot";
 
 export const metadata: Metadata = {
   title: {
@@ -84,6 +85,9 @@ export default function RootLayout({
 
           {/* Quick intro curtain, once per session */}
           <Loader />
+
+          {/* Portfolio AI Chatbot */}
+          <Chatbot />
 
           {/* Film grain over everything */}
           <div

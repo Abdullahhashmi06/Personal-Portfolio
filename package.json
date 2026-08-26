@@ -7,9 +7,13 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "ingest": "node scripts/ingest-knowledge.mjs",
+    "ingest:knowledge": "node scripts/ingest-knowledge.mjs"
   },
   "dependencies": {
+    "@huggingface/transformers": "^4.2.0",
+    "@supabase/supabase-js": "^2.112.4",
     "dotenv": "^17.4.2",
     "geist": "^1.7.2",
     "googleapis": "^176.0.0",
@@ -18,7 +22,9 @@
     "next": "16.3.1",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "react-google-recaptcha-v2": "^3.0.0-alpha.1"
+    "react-google-recaptcha-v2": "^3.0.0-alpha.1",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
