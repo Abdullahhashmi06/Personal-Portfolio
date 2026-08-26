@@ -1,15 +1,12 @@
 "use client";
 
-import { motion } from "motion/react";
 import { CaseStudyHero } from "@/components/casestudy/CaseStudyHero";
 import { CaseStudySection } from "@/components/casestudy/CaseStudySection";
 import { WorkflowStep } from "@/components/casestudy/WorkflowStep";
 import { Reveal } from "@/components/ui/Reveal";
-import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
 import { ExternalLink } from "lucide-react";
 import { GithubIcon } from "@/components/ui/BrandIcons";
-import { EASE } from "@/lib/utils";
 
 const features = [
   {

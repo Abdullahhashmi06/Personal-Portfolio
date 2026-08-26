@@ -21,8 +21,7 @@ async function getExtractor(): Promise<FeatureExtractionPipeline> {
 
   loadPromise = (async () => {
     try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), MODEL_LOAD_TIMEOUT_MS);
+      console.log("[Embeddings] Loading embedding model (cold start)...", MODEL_ID);
 
       const pipe = await Promise.race([
         pipeline("feature-extraction", MODEL_ID, {
@@ -30,13 +29,13 @@ async function getExtractor(): Promise<FeatureExtractionPipeline> {
         }),
         new Promise<never>((_, reject) =>
           setTimeout(
-            () => reject(new Error(`Embedding model failed to load within ${MODEL_LOAD_TIMEOUT_MS / 1000}s`)),
+            () => reject(new Error(`Embedding model failed to load within ${MODEL_LOAD_TIMEOUT_MS / 1000}s. This may happen on Vercel cold starts — try again.`)),
             MODEL_LOAD_TIMEOUT_MS
           )
         ),
       ]);
 
-      clearTimeout(timeout);
+      console.log("[Embeddings] Model loaded successfully.");
       extractor = pipe;
       return pipe;
     } catch (err) {

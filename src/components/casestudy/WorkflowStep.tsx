@@ -1,8 +1,6 @@
 "use client";
 
-import { motion } from "motion/react";
 import { Reveal } from "../ui/Reveal";
-import { cn } from "@/lib/utils";
 
 interface WorkflowStepProps {
   number: string;

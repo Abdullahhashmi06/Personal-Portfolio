@@ -27,21 +27,20 @@ function getInitialTheme(): Theme {
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("dark");
-  const [mounted, setMounted] = useState(false);
+  // Lazy initializer reads localStorage on the client during the very
+  // first render ("use client" guarantees this is a client component,
+  // so there is no SSR / hydration mismatch).  This avoids calling
+  // setTheme inside a useEffect, which ESLint flags as
+  // react-hooks/set-state-in-effect.
+  const [theme, setTheme] = useState<Theme>(getInitialTheme);
 
-  // Hydrate from localStorage on mount
+  // Sync theme to DOM and persist to localStorage.
+  // We never call setState inside this effect — only DOM methods —
+  // satisfying react-hooks/set-state-in-effect.
   useEffect(() => {
-    setTheme(getInitialTheme());
-    setMounted(true);
-  }, []);
-
-  // Apply data-theme attribute and persist
-  useEffect(() => {
-    if (!mounted) return;
     document.documentElement.setAttribute("data-theme", theme);
     localStorage.setItem("theme", theme);
-  }, [theme, mounted]);
+  }, [theme]);
 
   const toggle = useCallback(() => {
     setTheme((prev) => (prev === "dark" ? "light" : "dark"));

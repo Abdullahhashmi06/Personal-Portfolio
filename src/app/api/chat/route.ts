@@ -9,6 +9,9 @@ import {
   getClientIP,
 } from "@/lib/ai/rate-limit";
 
+/** Allow up to 30s on Vercel Pro for embedding model cold starts. */
+export const maxDuration = 30;
+
 export async function POST(req: NextRequest) {
   try {
     /* --- Rate Limit --- */

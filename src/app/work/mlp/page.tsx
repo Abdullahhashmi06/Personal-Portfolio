@@ -1,14 +1,9 @@
 "use client";
 
-import { motion } from "motion/react";
 import { CaseStudyHero } from "@/components/casestudy/CaseStudyHero";
 import { CaseStudySection } from "@/components/casestudy/CaseStudySection";
 import { WorkflowStep } from "@/components/casestudy/WorkflowStep";
 import { Reveal } from "@/components/ui/Reveal";
-import { Container } from "@/components/ui/Container";
-import { Button } from "@/components/ui/Button";
-import { ExternalLink } from "lucide-react";
-import { EASE } from "@/lib/utils";
 
 export default function MLPCaseStudy() {
   return (
@@ -140,7 +135,7 @@ export default function MLPCaseStudy() {
       <CaseStudySection label="Dataset">
         <Reveal>
           <h2 className="text-2xl font-semibold tracking-tight text-fg sm:text-3xl">
-            Google's MNIST Dataset
+            Google&apos;s MNIST Dataset
           </h2>
           <p className="mt-4 max-w-2xl text-base leading-relaxed text-muted sm:text-lg">
             The project uses the MNIST dataset — a standard benchmark of

@@ -5,7 +5,6 @@ import { motion } from "motion/react";
 import { ArrowUpRight, Check, Loader2 } from "lucide-react";
 import { GithubIcon, LinkedinIcon } from "@/components/ui/BrandIcons";
 import { socials } from "@/data/socials";
-import { site } from "@/data/site";
 import ReCAPTCHA from "react-google-recaptcha-v2";
 import { cn, EASE } from "@/lib/utils";
 import { Container } from "@/components/ui/Container";

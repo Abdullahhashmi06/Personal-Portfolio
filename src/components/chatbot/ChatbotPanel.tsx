@@ -64,19 +64,47 @@ export function ChatbotPanel({ open, onClose }: ChatbotPanelProps) {
           .filter((m) => m.id !== "welcome")
           .map((m) => ({ role: m.role, content: m.content }));
 
-        const res = await fetch("/api/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: content, history }),
-        });
+        let res: Response;
+        try {
+          res = await fetch("/api/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message: content, history }),
+          });
+        } catch {
+          // fetch() itself failed — true network error
+          const networkError: Message = {
+            id: (Date.now() + 1).toString(),
+            role: "assistant",
+            content:
+              "Network error. Please check your connection and try again.",
+            error: true,
+          };
+          setMessages((prev) => [...prev, networkError]);
+          return;
+        }
 
-        const data = await res.json();
+        // Parse response — handle non-JSON responses gracefully
+        let data: Record<string, unknown>;
+        try {
+          data = await res.json();
+        } catch {
+          const serverError: Message = {
+            id: (Date.now() + 1).toString(),
+            role: "assistant",
+            content:
+              "The server returned an unexpected response. Please try again.",
+            error: true,
+          };
+          setMessages((prev) => [...prev, serverError]);
+          return;
+        }
 
         if (!res.ok) {
           const errorMsg: Message = {
             id: (Date.now() + 1).toString(),
             role: "assistant",
-            content: data.error || "Something went wrong. Please try again.",
+            content: (data.error as string) || "Something went wrong. Please try again.",
             error: true,
           };
           setMessages((prev) => [...prev, errorMsg]);
@@ -84,20 +112,11 @@ export function ChatbotPanel({ open, onClose }: ChatbotPanelProps) {
           const assistantMessage: Message = {
             id: (Date.now() + 1).toString(),
             role: "assistant",
-            content: data.content,
-            sources: data.sources,
+            content: data.content as string,
+            sources: data.sources as { title: string; source: string }[],
           };
           setMessages((prev) => [...prev, assistantMessage]);
         }
-      } catch {
-        const networkError: Message = {
-          id: (Date.now() + 1).toString(),
-          role: "assistant",
-          content:
-            "Network error. Please check your connection and try again.",
-          error: true,
-        };
-        setMessages((prev) => [...prev, networkError]);
       } finally {
         setLoading(false);
       }

@@ -21,7 +21,7 @@ export function chunkText(
     metadata?: Record<string, unknown>;
   } = {}
 ): Chunk[] {
-  const { maxChunkSize = 800, overlap = 100, metadata = {} } = options;
+  const { maxChunkSize = 800, metadata = {} } = options;
   const chunks: Chunk[] = [];
 
   // Split by double newlines (paragraphs)

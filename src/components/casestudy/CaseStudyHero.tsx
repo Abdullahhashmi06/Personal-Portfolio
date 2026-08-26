@@ -2,7 +2,7 @@
 
 import { motion } from "motion/react";
 import Image from "next/image";
-import { ArrowUpRight, ExternalLink } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import { GithubIcon } from "../ui/BrandIcons";
 import { Container } from "../ui/Container";
 import { Button } from "../ui/Button";

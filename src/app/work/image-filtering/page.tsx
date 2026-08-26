@@ -1,12 +1,9 @@
 "use client";
 
-import { motion } from "motion/react";
 import { CaseStudyHero } from "@/components/casestudy/CaseStudyHero";
 import { CaseStudySection } from "@/components/casestudy/CaseStudySection";
 import { WorkflowStep } from "@/components/casestudy/WorkflowStep";
 import { Reveal } from "@/components/ui/Reveal";
-import { Container } from "@/components/ui/Container";
-import { EASE } from "@/lib/utils";
 
 export default function ImageFilteringCaseStudy() {
   return (

@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "motion/react";
 import { Container } from "../ui/Container";
 import { Reveal } from "../ui/Reveal";
 import { cn } from "@/lib/utils";

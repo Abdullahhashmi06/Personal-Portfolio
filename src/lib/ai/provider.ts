@@ -33,7 +33,7 @@ class GroqProvider implements LLMProvider {
     const model = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
 
     if (!apiKey) {
-      throw new Error("GROQ_API_KEY not configured");
+      throw new ProviderError(this.name, "GROQ_API_KEY not configured", "not_configured");
     }
 
     const res = await fetch(
@@ -94,7 +94,7 @@ class OpenRouterProvider implements LLMProvider {
       process.env.OPENROUTER_MODEL || "meta-llama/llama-3.3-70b-instruct:free";
 
     if (!apiKey) {
-      throw new Error("OPENROUTER_API_KEY not configured");
+      throw new ProviderError(this.name, "OPENROUTER_API_KEY not configured", "not_configured");
     }
 
     const res = await fetch(
@@ -146,6 +146,7 @@ export type ErrorType =
   | "client_error"
   | "empty_response"
   | "timeout"
+  | "not_configured"
   | "unknown";
 
 export class ProviderError extends Error {
@@ -161,11 +162,9 @@ export class ProviderError extends Error {
 
   /** Whether this error should trigger fallback to another provider */
   get shouldFallback(): boolean {
-    return (
-      this.errorType === "rate_limited" ||
-      this.errorType === "server_error" ||
-      this.errorType === "timeout"
-    );
+    // Always try fallback on any provider failure — a wasted API call
+    // is acceptable for a portfolio site, but a dead chatbot is not.
+    return this.errorType !== "not_configured";
   }
 }
 

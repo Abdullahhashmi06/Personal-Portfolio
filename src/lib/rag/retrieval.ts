@@ -1,5 +1,5 @@
 import { getSupabaseServer } from "@/lib/supabase/server";
-import { generateEmbedding, EMBEDDING_DIMENSION } from "./embeddings";
+import { generateEmbedding } from "./embeddings";
 
 export interface RetrievedChunk {
   id: string;
@@ -69,7 +69,7 @@ export function buildRAGContext(chunks: RetrievedChunk[]): string {
 
   return chunks
     .map(
-      (chunk, i) =>
+      (chunk) =>
         `[Source: ${chunk.documentTitle} (${chunk.documentSource})]\n${chunk.content}`
     )
     .join("\n\n---\n\n");

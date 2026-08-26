@@ -76,7 +76,7 @@ export function Navbar() {
         {/* Desktop links */}
         <ul className="hidden items-center gap-1 md:flex">
           {site.nav.map((link) => {
-            const id = link.href.slice(1);
+            const id = link.href.replace(/^\//, "").replace(/^#/, "");
             const isActive = active === id;
             return (
               <li key={link.href}>

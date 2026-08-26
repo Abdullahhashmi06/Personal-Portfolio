@@ -64,9 +64,9 @@ export const site = {
 
   /** Main navigation. */
   nav: [
-    { label: "Work", href: "#work" },
-    { label: "About", href: "#about" },
-    { label: "Skills", href: "#skills" },
+    { label: "Work", href: "/#work" },
+    { label: "About", href: "/#about" },
+    { label: "Skills", href: "/#skills" },
     { label: "Contact", href: "/contact" },
   ] as NavLink[],
 } as const;
