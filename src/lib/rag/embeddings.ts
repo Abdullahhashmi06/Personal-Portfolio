@@ -1,4 +1,4 @@
-import { pipeline, type FeatureExtractionPipeline } from "@huggingface/transformers";
+import type { FeatureExtractionPipeline } from "@huggingface/transformers";
 
 const MODEL_ID = "Xenova/all-MiniLM-L6-v2";
 const DIMENSION = 384;
@@ -12,6 +12,10 @@ let loadPromise: Promise<FeatureExtractionPipeline> | null = null;
  * Get or initialize the embedding pipeline.
  * The model is loaded once and reused across warm invocations.
  * On Vercel, cold starts may take 10-20 seconds as the model downloads.
+ *
+ * Uses a dynamic import so @huggingface/transformers (119 MB) is not
+ * statically bundled into the serverless function, which would exceed
+ * Vercel's function-size limits and crash at module-load time.
  */
 async function getExtractor(): Promise<FeatureExtractionPipeline> {
   if (extractor) return extractor;
@@ -22,6 +26,9 @@ async function getExtractor(): Promise<FeatureExtractionPipeline> {
   loadPromise = (async () => {
     try {
       console.log("[Embeddings] Loading embedding model (cold start)...", MODEL_ID);
+
+      // Dynamic import — only loaded on first call, not at module init
+      const { pipeline } = await import("@huggingface/transformers");
 
       const pipe = await Promise.race([
         pipeline("feature-extraction", MODEL_ID, {
