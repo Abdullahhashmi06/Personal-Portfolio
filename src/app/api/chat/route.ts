@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
-import { retrieveRelevantChunks, buildRAGContext } from "@/lib/rag/retrieval";
+import { NextRequest } from "next/server";
+import { retrieveRelevantChunks, buildRAGContext, type RetrievedChunk } from "@/lib/rag/retrieval";
 import { buildMessages, FALLBACK_RESPONSE } from "@/lib/ai/prompts";
 import { generateAIResponse } from "@/lib/ai/provider";
 import {
@@ -12,16 +12,32 @@ import {
 /** Allow up to 30s on Vercel Pro for embedding model cold starts. */
 export const maxDuration = 30;
 
+/**
+ * Always return a JSON response.
+ * This wrapper ensures that even if NextResponse.json() somehow fails,
+ * we still return a valid JSON string.
+ */
+function jsonResponse(body: Record<string, unknown>, init?: { status?: number }): Response {
+  const status = init?.status ?? 200;
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: {
+      "Content-Type": "application/json; charset=utf-8",
+    },
+  });
+}
+
 export async function POST(req: NextRequest) {
+  console.log("[Chat] Request received");
+
+  /* --- Rate Limit --- */
   try {
-    /* --- Rate Limit --- */
     const ip = getClientIP(req.headers);
     const rateLimited = checkRateLimit(ip);
     if (rateLimited !== null) {
-      return NextResponse.json(
-        {
-          error: `Too many requests. Please wait ${rateLimited} seconds.`,
-        },
+      console.warn("[Chat] Rate limited:", ip);
+      return jsonResponse(
+        { error: `Too many requests. Please wait ${rateLimited} seconds.` },
         { status: 429 }
       );
     }
@@ -31,36 +47,35 @@ export async function POST(req: NextRequest) {
     try {
       body = await req.json();
     } catch {
-      return NextResponse.json(
-        { error: "Invalid request body." },
-        { status: 400 }
-      );
+      return jsonResponse({ error: "Invalid request body." }, { status: 400 });
     }
 
     /* --- Validate Message --- */
     const message = String(body.message || "");
     const validation = validateMessage(message);
     if (!validation.valid) {
-      return NextResponse.json(
-        { error: validation.error },
-        { status: 400 }
-      );
+      return jsonResponse({ error: validation.error }, { status: 400 });
     }
+
+    console.log(`[Chat] Message length: ${message.length}`);
 
     /* --- Validate & Sanitize History --- */
     const history = sanitizeHistory(body.history);
+    console.log(`[Chat] History length: ${history.length}`);
 
     /* --- RAG Retrieval --- */
-    const chunks = await retrieveRelevantChunks(message, {
-      topK: 6,
-      threshold: 0.25,
-    });
+    let chunks: RetrievedChunk[] = [];
+    try {
+      chunks = await retrieveRelevantChunks(message, {
+        topK: 6,
+        threshold: 0.25,
+      });
+    } catch (ragErr) {
+      console.error("[Chat] RAG retrieval error:", ragErr);
+    }
 
     const ragContext = buildRAGContext(chunks);
-
-    console.log(
-      `[Chat] Retrieved ${chunks.length} chunks for query: "${message.slice(0, 80)}..."`
-    );
+    console.log(`[Chat] Retrieved ${chunks.length} chunks`);
 
     /* --- Build Messages --- */
     const messages = buildMessages(message, ragContext, history);
@@ -71,18 +86,18 @@ export async function POST(req: NextRequest) {
       response = await generateAIResponse(messages);
     } catch (err) {
       console.error("[Chat] All providers failed:", err);
-      return NextResponse.json(
+      return jsonResponse(
         { error: FALLBACK_RESPONSE },
         { status: 503 }
       );
     }
 
     console.log(
-      `[Chat] Response generated via ${response.provider} (${response.model})`
+      `[Chat] Response generated via ${response.provider} (${response.model}), length: ${response.content.length}`
     );
 
     /* --- Return Response --- */
-    return NextResponse.json({
+    return jsonResponse({
       content: response.content,
       provider: response.provider,
       sources: chunks.map((c) => ({
@@ -92,7 +107,7 @@ export async function POST(req: NextRequest) {
     });
   } catch (err) {
     console.error("[Chat] Unexpected error:", err);
-    return NextResponse.json(
+    return jsonResponse(
       { error: "Something went wrong. Please try again." },
       { status: 500 }
     );

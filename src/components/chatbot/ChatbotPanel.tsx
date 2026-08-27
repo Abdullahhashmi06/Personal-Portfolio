@@ -89,6 +89,13 @@ export function ChatbotPanel({ open, onClose }: ChatbotPanelProps) {
         try {
           data = await res.json();
         } catch {
+          // Log the actual response for debugging
+          const rawBody = await res.text().catch(() => "<could not read body>");
+          console.error("[Chatbot] Failed to parse JSON response:", {
+            status: res.status,
+            contentType: res.headers.get("content-type"),
+            bodyPreview: rawBody.slice(0, 500),
+          });
           const serverError: Message = {
             id: (Date.now() + 1).toString(),
             role: "assistant",
